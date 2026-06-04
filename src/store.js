@@ -1,4 +1,4 @@
-
+import { createStore } from "redux";
 
 const initialState = {
     balance: 0,
@@ -48,10 +48,30 @@ function reducer(state = initialState, action) {
 
 
 
+const store = createStore(reducer);
+
+
+
+store.dispatch({ type: "account/deposit", payload: 100 })
+console.log(store.getState())
+
+store.dispatch({ type: "account/withdraw", payload: 50 })
+console.log(store.getState())
+
+
+store.dispatch({ type: "account/requestLoan", payload: 1000 })
+console.log(store.getState())
+
+
+store.dispatch({ type: "account/payLoan" })
+console.log(store.getState())
 
 
 
 
+
+
+export default store;
 
 
 
