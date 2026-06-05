@@ -21,15 +21,18 @@ function reducer(state = initialState, action) {
                 ...state,
                 balance: state.balance - action.payload,
             }
+
         case "account/requestLoan":
             if (state.loan > 0) return state
 
-            // ! LATER
+
             return {
                 ...state,
-                loan: action.payload,
-
+                loan: action.payload.amount,
+                loanPurpose: action.payload.purpose,
+                balance: state.balance + action.payload.amount,
             }
+
         case "account/payLoan":
             return {
                 ...state,
@@ -46,24 +49,64 @@ function reducer(state = initialState, action) {
 }
 
 
-
-
 const store = createStore(reducer);
 
+// ! Not to use good for real apps, just for testing. why? because it doesn't have middleware, devtools, etc.
+
+// store.dispatch({ type: "account/deposit", payload: 500 })
+// console.log(store.getState())
+
+// store.dispatch({ type: "account/withdraw", payload: 200 })
+// console.log(store.getState())
 
 
-store.dispatch({ type: "account/deposit", payload: 100 })
+// store.dispatch({ type: "account/requestLoan", payload: { amount: 1000, purpose: "Buy a car" }, })
+// console.log(store.getState())
+
+
+// store.dispatch({ type: "account/payLoan" })
+// console.log(store.getState())
+
+//! use action creators instead of dispatching objects directly, it's a good practice and makes it easier to manage actions in larger applications.
+
+function deposit(amount) {
+    return {
+        type: "account/deposit",
+        payload: amount,
+    }
+}
+
+function withdraw(amount) {
+    return {
+        type: "account/withdraw",
+        payload: amount,
+    }
+}
+
+function requestLoan(amount, purpose) {
+    return {
+        type: "account/requestLoan",
+        payload: { amount, purpose },
+    }
+}
+
+function payLoan() {
+    return {
+        type: "account/payLoan",
+    }
+}
+
+
+store.dispatch(deposit(500))
 console.log(store.getState())
 
-store.dispatch({ type: "account/withdraw", payload: 50 })
+store.dispatch(withdraw(200))
 console.log(store.getState())
 
-
-store.dispatch({ type: "account/requestLoan", payload: 1000 })
+store.dispatch(requestLoan(1000, "Buy a car"))
 console.log(store.getState())
 
-
-store.dispatch({ type: "account/payLoan" })
+store.dispatch(payLoan())
 console.log(store.getState())
 
 
