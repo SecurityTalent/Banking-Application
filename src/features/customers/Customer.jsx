@@ -1,5 +1,15 @@
+
+import { useSelector } from "react-redux";
+
+
+
 function Customer() {
-  return <h2>👋 Welcome, %NAME%</h2>;
+  const Customer = useSelector((state) => state.customer.fullName);
+
+  console.log(Customer)
+
+  return <h2>👋 Welcome, {Customer}</h2>;
 }
 
 export default Customer;
+
