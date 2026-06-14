@@ -5,6 +5,10 @@ import App from './App.jsx'
 
 import store from './store.js'
 
+store.dispatch({ type: 'account/deposit', payload: 1000 })
+console.log(store.getState())
+
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
