@@ -20,13 +20,14 @@ function AccountOperations() {
   const dispatch = useDispatch();
   const {loan: currentLoan, loanPurpose: currentLoanPurpose, balance, isLoading} = useSelector((store) => store.account);
 
- 
   // console.log(balance);
-
 
   function handleDeposit() {
     if(!depositAmount) return;
-    dispatch(deposit(Number(depositAmount), currency));
+    // dispatch(deposit(Number(depositAmount), currency)); // ! Version V1 without redux toolkit
+    dispatch(deposit(Number(depositAmount)));  // ! Version V2 with redux toolkit
+
+
     setDepositAmount("");
     setCurrency("USD");
   }
