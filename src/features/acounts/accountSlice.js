@@ -2,7 +2,8 @@ const initialState = {
     balance: 0,
     loan: 0,
     loanPurpose: "",
-
+    isLoading: false,
+    
 }
 
 export default function accountReducer(state = initialState, action) {
@@ -11,6 +12,7 @@ export default function accountReducer(state = initialState, action) {
             return {
                 ...state,
                 balance: state.balance + action.payload,
+                isLoading: false,
             }
 
         case "account/withdraw":
@@ -36,6 +38,11 @@ export default function accountReducer(state = initialState, action) {
                 balance: state.balance - state.loan,
                 loan: 0,
             }
+        case "account/convertingCurrency":
+            return {
+                ...state,
+                isLoading: true,
+            }
 
         default:
             return state;
@@ -45,15 +52,43 @@ export default function accountReducer(state = initialState, action) {
 
 }
 
+// ! redux thunk allows us to write action creators that return a function instead of an action object. This is useful for handling asynchronous operations, such as fetching data from an API, before dispatching an action to the reducer.
 
-
-
-export function deposit(amount) {
-    return {
-        type: "account/deposit",
-        payload: amount,
+export function deposit(amount, currency) {
+    if (currency === "USD") {
+        return {
+            type: "account/deposit",
+            payload: amount,
+        };
     }
+
+
+    return async function (dispatch, getState) {
+        dispatch({
+            type: "account/convertingCurrency",
+        })
+
+        try {
+            const res = await fetch(`https://api.frankfurter.dev/v1/latest?base=${currency}&symbols=USD`);
+
+            if (!res.ok) throw new Error("Failed to fetch exchange rate");
+            const data = await res.json();
+            const convertedAmount = amount * data.rates.USD;
+
+            dispatch({
+                type: "account/deposit",
+                payload: convertedAmount,
+            });
+        } 
+        
+        catch (err) {
+            console.error(err);
+        }
+    };
 }
+
+
+
 
 export function withdraw(amount) {
     return {
