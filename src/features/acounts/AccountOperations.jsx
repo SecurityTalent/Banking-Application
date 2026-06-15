@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { withdraw } from "./accountSlice";
 import { requestLoan } from "./accountSlice";
 import { payLoan } from "./accountSlice";
+import { depositMoney } from "./accountSlice";
 
 
 
@@ -25,7 +26,7 @@ function AccountOperations() {
   function handleDeposit() {
     if(!depositAmount) return;
     // dispatch(deposit(Number(depositAmount), currency)); // ! Version V1 without redux toolkit
-    dispatch(deposit(Number(depositAmount)));  // ! Version V2 with redux toolkit
+    dispatch(depositMoney(Number(depositAmount), currency));  // ! Version V2 with redux toolkit
 
 
     setDepositAmount("");

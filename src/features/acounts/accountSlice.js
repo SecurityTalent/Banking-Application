@@ -1,6 +1,7 @@
 import {createSlice} from "@reduxjs/toolkit";
 
 
+
 const initialState = {
     balance: 0,
     loan: 0,
@@ -9,52 +10,86 @@ const initialState = {
     
 }
 
-const accountSlice  = createSlice({
-    name: "account",
-    initialState,
-    reducers: {
-        deposit(state, action) {
-            state.balance += action.payload;
-        },
-        withdraw(state, action) {
-            state.balance -= action.payload;
-        },
+const accountSlice = createSlice({
+  name: "account",
+  initialState,
+  reducers: {
+    deposit(state, action) {
+      state.balance += action.payload;
+      state.isLoading = false;
+    },
+
+    withdraw(state, action) {
+      state.balance -= action.payload;
+    },
+
+    requestLoan: {
+      prepare(amount, purpose) {
+        return {
+          payload: { amount, purpose },
+        };
+      },
+      reducer(state, action) {
+        if (state.loan > 0) return;
+
+        state.loan = action.payload.amount;
+        state.loanPurpose = action.payload.purpose;
+        state.balance += action.payload.amount;
+      },
+    },
+
+    payLoan(state) {
+      state.balance -= state.loan;
+      state.loan = 0;
+      state.loanPurpose = "";
+    },
+
+    convertingCurrency(state) {
+      state.isLoading = true;
+    },
+  },
+});
 
 
+// ! redux toolkit thunk 
 
-        requestLoan: {
-            prepare(amount, purpose) {
-                return {
-                    payload: { amount, purpose },
-                }
-            },
-            
-            reducer(state, action) {
-                if (state.loan > 0) return;
+export function depositMoney(amount, currency) {
+  if (currency === "USD") {
+    return {
+      type: "account/deposit",
+      payload: amount,
+    };
+  }
 
-                state.loan = action.payload.amount;
-                state.loanPurpose = action.payload.purpose;
-                state.balance += action.payload.amount;
-            }
-        },
+  return async function (dispatch) {
+    dispatch({ type: "account/convertingCurrency" });
 
+    const res = await fetch(
+      `https://api.frankfurter.dev/v1/latest?amount=${amount}&base=${currency}&symbols=USD`
+    );
 
+    const data = await res.json();
+    console.log(data);
 
-        payLoan(state, action) {
-            state.balance -= state.loan;
-            state.loan = 0;
-            state.loanPurpose = "";
-        },
-        convertingCurrency(state) {
-            state.isLoading = true;
-        }
-    }
-})
+    dispatch({
+      type: "account/deposit",
+      payload: data.rates.USD,
+    });
+  };
+}
+
 
 // console.log(accountSlice);
-export const {deposit, withdraw, requestLoan, payLoan, convertingCurrency} = accountSlice.actions;
+export const {
+  deposit,
+  withdraw,
+  requestLoan,
+  payLoan,
+  convertingCurrency,
+} = accountSlice.actions;
 
 export default accountSlice.reducer;
+
 
 // console.log(requestLoan(1000, "Buy a car"));
 
@@ -118,6 +153,7 @@ export default accountSlice.reducer;
 //     }
 
 
+// ! redux toolkit thunk 
 //     return async function (dispatch, getState) {
 //         dispatch({
 //             type: "account/convertingCurrency",
